@@ -5,7 +5,9 @@ const bcrypt = require('bcryptjs');
 const { sql, connectDB } = require('./db'); // ✅ FIXED IMPORT
 const app = express();
 app.use(express.json());
-app.use(cors());
+app.use(cors({
+    origin: 'https://mylearninghub.onrender.com/',  // Replace with your frontend URL
+  }));
 app.use((req, res, next) => {
     console.log(`🌍 [${req.method}] ${req.url}`, req.body);
     next();
