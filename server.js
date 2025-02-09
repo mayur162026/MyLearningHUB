@@ -2,12 +2,12 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
-const { sql, connectDB } = require('./db'); // ✅ FIXED IMPORT
+const { sql, connectDB, getPool } = require('./db'); // ✅ FIXED IMPORT
 const app = express();
 app.use(express.json());
 app.use(cors({
     origin: 'https://mylearninghub.onrender.com/',  // Replace with your frontend URL
-  }));
+}));
 app.use((req, res, next) => {
     console.log(`🌍 [${req.method}] ${req.url}`, req.body);
     next();
@@ -27,7 +27,10 @@ app.post('/api/login', async (req, res) => {
     try {
         const { username, password } = req.body;
         console.log("🔍 Checking user:", username);
-        const result = await sql.query`SELECT * FROM [EnglishBuddy].[dbo].[Login] WHERE username = ${username}`;
+        const pool = getPool();
+        const result = await pool.request()
+            .input('username', sql.VarChar, username)
+            .query('SELECT * FROM [EnglishBuddy].[dbo].[Login] WHERE username = @username');
         if (result.recordset.length > 0) {
             const user = result.recordset[0];
             const isMatch = await bcrypt.compare(password, user.password_hash);
